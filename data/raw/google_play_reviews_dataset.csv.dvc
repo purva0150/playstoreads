@@ -1,0 +1,5 @@
+outs:
+- md5: 6d52389b960789c87b90b2fd9f9c9f56
+  size: 5692568
+  hash: md5
+  path: google_play_reviews_dataset.csv

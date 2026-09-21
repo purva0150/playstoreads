@@ -35,7 +35,6 @@ jobs:
         run: |
           python -m pytest -v
 
-
   lint:
     name: Code Quality Check
     runs-on: ubuntu-latest
@@ -56,11 +55,10 @@ jobs:
           pip install -r requirements.txt
           pip install flake8
 
-      - - name: Run Flake8
-          working-directory: sentiment_analysis
-          run: |
-           flake8 app.py test_app.py --ignore=E501,W503
-
+      - name: Run Flake8
+        working-directory: sentiment_analysis
+        run: |
+          flake8 app.py test_app.py --ignore=E501,W503
 
   build:
     name: Docker Build

@@ -24,10 +24,10 @@ svm_model = model_package["model"]
 # Same text cleaning used during training
 def clean_text(text):
     text = text.lower()
-    text = re.sub(r'http\S+|www\S+', '', text)
-    text = re.sub(r'<.*?>', '', text)
-    text = re.sub(r'[^a-z0-9\s!?]', ' ', text)
-    text = re.sub(r'\s+', ' ', text).strip()
+    text = re.sub(r"http\S+|www\S+", "", text)
+    text = re.sub(r"<.*?>", "", text)
+    text = re.sub(r"[^a-z0-9\s!?]", " ", text)
+    text = re.sub(r"\s+", " ", text).strip()
 
     return text
 
@@ -54,7 +54,6 @@ def health():
 
 @app.post("/predict")
 def predict(request: ReviewRequest):
-
     # 1. Clean the review
     cleaned_review = clean_text(request.review_text)
 

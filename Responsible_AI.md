@@ -1,108 +1,103 @@
 # Responsible AI Report
 
-## 1. Project Overview
+## 1. Executive Summary
 
-This project performs sentiment analysis on Google Play Store reviews.
+This project develops a Google Play Store sentiment analysis system that
+classifies user reviews into three sentiment categories: Positive,
+Negative, and Neutral.
 
-The system uses:
+The system uses TF-IDF for text representation and a Linear Support
+Vector Machine (SVM) for classification. LIME and SHAP were used as
+explainability techniques to understand model behavior.
 
-- TF-IDF for text feature extraction
-- Linear Support Vector Machine (SVM) for sentiment classification
-- LIME for local model explanations
-- SHAP for model feature-importance analysis
+Responsible AI considerations were evaluated across fairness, privacy,
+consent, transparency, explainability, performance, robustness,
+security, human oversight, and monitoring.
 
-The model classifies reviews into Positive, Negative, and Neutral
-sentiment categories.
-
----
-
-## 2. Fairness
-
-The model is trained using Google Play Store review data.
-
-The available dataset does not contain explicit sensitive demographic
-attributes such as age, gender, religion, ethnicity, or income.
-Therefore, demographic fairness metrics were not calculated.
-
-Model performance may vary for different writing styles, expressions,
-languages, or types of reviews.
-
-The prediction should therefore be treated as a model output and not
-as an absolute judgment.
+The purpose of this report is to document the responsible use,
+limitations, and potential risks of the developed sentiment analysis
+system.
 
 ---
 
-## 3. Privacy
+## 2. System Description
 
-The application accepts review text from users for sentiment prediction.
+### Application
 
-Users should avoid entering sensitive or personal information such as:
+The application accepts a Google Play Store review as input and predicts
+its sentiment.
 
-- Names and personal identifiers
-- Phone numbers
-- Email addresses
-- Passwords
-- Financial information
-- Confidential information
+### Processing Pipeline
 
-User-provided reviews should not be unnecessarily stored or exposed.
-
----
-
-## 4. Consent
-
-The review text entered into the application is used for sentiment
-prediction.
-
-If user data is collected, stored, reused, or used for future model
-training, users should be informed about how their data will be used.
-
-Data should not be reused for purposes beyond the stated purpose without
-appropriate consent.
-
----
-
-## 5. Transparency
-
-The sentiment prediction pipeline is:
+The system follows this pipeline:
 
 1. User enters a review.
-2. The review is cleaned using text preprocessing.
+2. Text preprocessing is applied.
 3. TF-IDF converts the text into numerical features.
-4. Linear SVM predicts the sentiment.
-5. LIME and SHAP can be used to understand model behavior.
+4. The trained Linear SVM model predicts the sentiment.
+5. LIME can provide a local explanation for an individual prediction.
+6. SHAP was used during the explainability experiment to study feature
+   importance.
 
-The model may produce incorrect predictions and should not be considered
-100% accurate.
+### Sentiment Classes
 
----
+The model supports:
 
-## 6. Explainability
-
-Explainability techniques were included to make the model's decisions
-easier to understand.
-
-### LIME
-
-LIME provides a local explanation for an individual review. It shows
-which words/features contributed to the prediction for that particular
-review.
-
-### SHAP
-
-SHAP provides feature-importance information and helps identify which
-text features have a strong influence on model predictions.
-
-These techniques improve transparency and help users understand why a
-prediction was generated.
+- Positive
+- Negative
+- Neutral
 
 ---
 
-## 7. Model Performance
+## 3. Dataset and Data Considerations
 
-The model was evaluated using a train-test split with a 20% test set.
+The experiment used a Google Play Store reviews dataset containing
+31,465 reviews.
 
-The evaluation from the sentiment analysis experiment reported:
+The available dataset contains fields including:
+
+- app_id
+- review_id
+- user_name
+- review_text
+- review_score
+- thumbs_up_count
+- review_date
+
+The review text was used as the main input for sentiment analysis.
+
+The dataset contains user-related fields such as `user_name`.
+Therefore, these fields should not be unnecessarily exposed or used as
+model features when they are not required for sentiment prediction.
+
+The project does not use explicit demographic attributes such as age,
+gender, religion, ethnicity, or income for prediction.
+
+---
+
+## 4. Model and Methodology
+
+The model uses:
+
+- TF-IDF Vectorization
+- Unigrams and Bigrams
+- Maximum 30,000 features
+- Linear SVM classifier
+- Class weighting to handle class imbalance
+- Stratified train-test split
+- 20% test data
+- Random state = 42
+
+The text preprocessing includes lowercasing, URL removal, HTML tag
+removal, removal of unwanted characters, and whitespace normalization.
+
+---
+
+## 5. Model Performance
+
+The model was evaluated on the test dataset.
+
+The reported results from the experiment were:
 
 | Metric | Result |
 |---|---:|
@@ -110,76 +105,318 @@ The evaluation from the sentiment analysis experiment reported:
 | Weighted F1-Score | 84.88% |
 | Macro F1-Score | 60.76% |
 
-The difference between Weighted F1 and Macro F1 indicates that model
-performance is not uniform across all sentiment classes.
+### Interpretation
 
-In particular, the Neutral class showed lower performance than the
-other sentiment classes in the experiment.
+The accuracy indicates that approximately 85.62% of the test predictions
+were correct.
 
-Therefore, users should consider the model's limitations when
-interpreting predictions.
+The Weighted F1-score accounts for the relative number of samples in
+each class.
 
----
+The Macro F1-score gives equal importance to each sentiment class.
+The difference between the Weighted F1-score and Macro F1-score indicates
+that performance was not uniform across the sentiment classes.
 
-## 8. Human Oversight
+The Neutral class showed substantially lower performance than the other
+sentiment classes during the experiment.
 
-The prediction generated by the model should be treated as an automated
-classification result.
-
-Users should consider the original review and its context instead of
-relying only on the predicted sentiment.
-
-The model should not be used as the sole basis for high-impact
-decisions about individuals.
+Therefore, accuracy alone should not be used to determine model
+reliability.
 
 ---
 
-## 9. Security
+## 6. Fairness Assessment
 
-The application should safely handle user-provided text.
+Fairness is important because machine learning models can behave
+differently for different groups or types of users.
 
-The system should avoid unnecessary logging or storage of raw review
-content.
+The available dataset does not contain explicit sensitive demographic
+attributes. Therefore, demographic fairness metrics could not be
+calculated from the available experiment.
 
-Dependencies and the application should be kept updated to reduce
-security risks.
+Potential sources of uneven performance include:
 
----
+- Different writing styles
+- Short reviews
+- Informal language
+- Spelling variations
+- Sarcasm
+- Mixed-language reviews
+- Different types of applications
 
-## 10. Model Limitations
+The model should therefore not be assumed to perform equally for every
+possible user or review type.
 
-The model has several limitations:
+### Fairness Mitigation
 
-- Sarcasm may be difficult to classify correctly.
-- Very short or ambiguous reviews may be difficult to classify.
-- Different writing styles may affect predictions.
-- Performance differs between sentiment classes.
-- The model may not generalize equally well to reviews from different
-  domains or languages.
-- Explainability methods such as LIME and SHAP provide explanations of
-  model behavior but do not guarantee that the explanation represents
-  the true reasoning behind the model.
+Future evaluation can include:
 
----
-
-## 11. Responsible Use
-
-This system is intended for sentiment analysis, experimentation, and
-educational purposes.
-
-Predictions should be interpreted as model-generated information and
-not as absolute truth.
-
-Human judgment should be retained when interpreting model predictions.
+- Testing performance across different language groups when appropriate
+  data is available.
+- Comparing precision, recall, and F1-score across relevant subsets.
+- Checking whether certain review categories consistently receive more
+  incorrect predictions.
+- Expanding the training dataset with more diverse review examples.
 
 ---
 
-## 12. Conclusion
+## 7. Privacy Assessment
 
-Responsible AI practices are incorporated through transparency,
-privacy considerations, explainability, human oversight, and
-acknowledgement of model limitations.
+The application accepts review text from users.
 
-LIME and SHAP provide additional insight into model predictions, while
-the Responsible AI guidelines help ensure that the system is used
-appropriately and responsibly.
+Users should avoid entering:
+
+- Personal identifiers
+- Phone numbers
+- Email addresses
+- Passwords
+- Financial information
+- Confidential information
+
+The application should avoid unnecessary storage or logging of raw
+user-provided reviews.
+
+If review data is stored for future analysis or model training, the data
+should be handled according to the applicable privacy requirements.
+
+---
+
+## 8. Consent and Data Usage
+
+The current application uses entered review text to generate a
+sentiment prediction.
+
+If additional user data is collected, stored, or reused, users should
+be informed about:
+
+- What data is collected
+- Why the data is collected
+- How the data will be used
+- Whether the data will be stored
+- Whether the data will be used for future model training
+
+Data should not be reused for unrelated purposes without appropriate
+permission or consent.
+
+---
+
+## 9. Transparency
+
+The system provides a clear machine learning pipeline:
+
+**Review → Text Cleaning → TF-IDF → Linear SVM → Sentiment**
+
+The model type, feature extraction method, and sentiment classes are
+known and documented.
+
+However, machine learning predictions are not guaranteed to be correct.
+
+Users should understand that the sentiment returned by the application
+is a prediction generated from patterns learned from the training data.
+
+---
+
+## 10. Explainability
+
+Explainability techniques were included to improve understanding of
+model predictions.
+
+### LIME
+
+LIME provides local explanations for individual predictions.
+
+It identifies words or features that contributed to the prediction of a
+specific review.
+
+This helps users understand why a particular review was classified as
+Positive, Negative, or Neutral.
+
+### SHAP
+
+SHAP was used during the model explainability experiment to analyze
+feature importance.
+
+SHAP helps identify features that have a stronger influence on model
+behavior.
+
+Together, LIME and SHAP provide additional transparency into the
+otherwise difficult-to-interpret machine learning model.
+
+### Limitation of Explainability
+
+LIME and SHAP explanations should not be interpreted as a perfect
+representation of the internal reasoning of the model. They are
+explanation methods that approximate or describe model behavior.
+
+---
+
+## 11. Robustness and Limitations
+
+The model may have difficulty with certain types of reviews.
+
+Potential limitations include:
+
+### Sarcasm
+
+A review such as "Amazing, another update that broke everything"
+contains language that may be difficult for a sentiment classifier to
+interpret correctly.
+
+### Very Short Reviews
+
+Reviews containing only a few words may not provide enough information
+for reliable classification.
+
+### Informal Language
+
+Slang, abbreviations, spelling errors, and unusual expressions may
+affect prediction quality.
+
+### Mixed Sentiment
+
+A review may contain both positive and negative statements, making
+classification difficult.
+
+### Language Variation
+
+The model may not perform equally well on languages or writing styles
+that were insufficiently represented in the training data.
+
+### Domain Variation
+
+The model was developed using Google Play Store reviews. Its performance
+may differ when applied to reviews from other domains.
+
+---
+
+## 12. Security Considerations
+
+The application should safely handle user-provided input.
+
+Security considerations include:
+
+- Validate user input.
+- Avoid unnecessary logging of raw reviews.
+- Avoid exposing sensitive information.
+- Keep application dependencies updated.
+- Protect the trained model and application files from unauthorized
+  modification.
+
+---
+
+## 13. Human Oversight
+
+The system provides automated sentiment predictions.
+
+The prediction should not be treated as an unquestionable decision.
+
+Users should consider the original review and its context when
+interpreting the prediction.
+
+Human review is particularly important when the prediction may influence
+an important decision.
+
+The system is intended primarily for sentiment analysis,
+experimentation, and educational purposes.
+
+---
+
+## 14. Monitoring and Drift
+
+Machine learning models can experience changes in input data over time.
+
+For example, Google Play Store reviews may change because of:
+
+- New applications
+- New slang
+- Changes in user behavior
+- Changes in review patterns
+- Changes in language usage
+
+The project includes monitoring considerations for input data.
+
+A future production implementation should monitor:
+
+- Distribution of predicted sentiment
+- Review length
+- Vocabulary changes
+- Prediction confidence or decision scores
+- Model performance when labelled data becomes available
+
+A formal statistical drift analysis was not performed as part of this
+experiment. Therefore, future versions can incorporate statistical
+methods such as distribution-based drift tests.
+
+---
+
+## 15. Responsible Use
+
+The system should be used for:
+
+- Sentiment analysis
+- Educational demonstrations
+- Software experimentation
+- Exploratory analysis of user reviews
+
+The system should not be used as the sole basis for:
+
+- High-impact decisions about individuals
+- Profiling users
+- Determining a person's character
+- Making decisions about employment, finance, healthcare, or other
+  sensitive areas
+
+---
+
+## 16. Risk-Mitigation Checklist
+
+| Responsible AI Area | Status | Mitigation / Consideration |
+|---|---|---|
+| Fairness | ⚠️ Requires monitoring | No demographic attributes available for fairness testing |
+| Privacy | ✅ Addressed | Avoid collecting unnecessary personal information |
+| Consent | ✅ Addressed | Inform users about data collection and reuse |
+| Transparency | ✅ Addressed | Model and processing pipeline documented |
+| Explainability | ✅ Implemented | LIME and SHAP used |
+| Performance | ✅ Evaluated | Accuracy and F1 metrics reported |
+| Robustness | ⚠️ Limitation identified | Sarcasm, short text and language variation can affect results |
+| Security | ⚠️ Requires maintenance | Validate inputs and update dependencies |
+| Human Oversight | ✅ Addressed | Predictions should not replace human judgment |
+| Monitoring | ⚠️ Requires future work | Monitor input and prediction distributions |
+
+---
+
+## 17. Future Improvements
+
+The following improvements can strengthen the responsible use of the
+system:
+
+1. Perform fairness analysis on appropriate demographic or linguistic
+   groups when ethically and legally suitable data is available.
+2. Evaluate the model on additional datasets.
+3. Add formal statistical drift detection.
+4. Monitor model performance after deployment.
+5. Improve handling of sarcasm and mixed sentiment.
+6. Support multilingual reviews where sufficient training data is
+   available.
+7. Periodically retrain and evaluate the model using representative
+   data.
+8. Minimize storage of user-provided review text.
+
+---
+
+## 18. Conclusion
+
+The Google Play Store sentiment analysis system incorporates several
+Responsible AI considerations including transparency, privacy,
+explainability, performance evaluation, human oversight, and recognition
+of model limitations.
+
+The use of LIME and SHAP improves the interpretability of the model,
+while the documented performance metrics provide evidence of model
+behavior.
+
+However, the system has limitations, particularly in class-wise
+performance, language variation, sarcasm, and generalization.
+
+Responsible deployment therefore requires continuous evaluation,
+appropriate monitoring, privacy protection, and human oversight.

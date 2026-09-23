@@ -4,3 +4,6 @@ scikit-learn
 joblib
 pydantic
 streamlit
+lime
+pandas
+matplotlib
